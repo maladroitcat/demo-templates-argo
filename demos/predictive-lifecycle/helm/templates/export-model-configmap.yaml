@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: export-model-scripts
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "110"
+data:
+  export_model.sh: |-
+    {{ .Files.Get "files/export_model.sh" | nindent 4 }}

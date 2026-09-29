@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: export-model-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "120"
+spec:
+  template:
+    spec:
+      containers:
+        - name: export-model
+          image: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/runtime-tensorflow:tensorflow
+          command: ["/bin/bash", "-c"]
+          args:
+            - |-
+              pip install -q boto3 && /scripts/export_model.sh
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: export-model-scripts
+            defaultMode: 0755
+      restartPolicy: Never
+      serviceAccountName: pipeline-server-{{ .Release.Namespace }}
+  backoffLimit: 3
